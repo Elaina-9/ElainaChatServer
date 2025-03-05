@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.UsersMapper">
+    <select id="checkUserExistsById" resultType="int">
+        SELECT COUNT(*) FROM users
+        WHERE id = #{id} and status = 1
+    </select>
+
+    <select id="login" resultType="org.example.entity.Users">
+        SELECT * FROM users
+        WHERE id = #{id} and  password = #{password} and status = 1
+    </select>
+
+    <update id="updateUser" parameterType="org.example.entity.Users">
+        UPDATE users
+        <set>
+            <if test="username != null">username = #{username},</if>
+        <if test="password != null">password = #{password},</if>
+        <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+        <if test="email != null">email = #{email},</if>
+        <if test="token != null">token = #{token},</if>
+        <if test="phone != null">phone = #{phone},</if>
+        <if test="status != null">status = #{status},</if>
+        <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
+    </set>
+    WHERE id = #{id}
+</update>
+
+    <select id="getUserIdByToken" resultType="Long">
+        SELECT id FROM users
+        WHERE token = #{token} and status = 1
+    </select>
+
+</mapper>

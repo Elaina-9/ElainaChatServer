@@ -1,0 +1,35 @@
+spring:
+    datasource:
+        url: jdbc:mysql://localhost:3306/elainachat
+        username: root
+        password: 123456
+        driver-class-name: com.mysql.cj.jdbc.Driver
+
+    sql:
+        init:
+            mode: always
+            schema-locations: classpath:messages.sql,classpath:user.sql
+            encoding: UTF-8
+            platform: mysql
+
+server:
+    port: 8080
+
+logging:
+    level:
+        org.springframework.jdbc.datasource.init: DEBUG
+        org.springframework.jdbc: DEBUG
+        root: info
+
+mybatis-plus:
+    mapper-locations: classpath:mapper/*.xml
+    type-aliases-package: com.elainachat.entity
+    configuration:
+        map-underscore-to-camel-case: true
+        log-impl:
+            log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+        plugins:
+          - com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor
+
+
+
