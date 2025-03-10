@@ -131,7 +131,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
                 Long senderId1 = messages.getSenderId();
                 Long receiverId1 = messages.getReceiverId();
                 String conversationId = senderId1.toString() + "_" + receiverId1.toString();
-                IPage<Messages> chatHistory = messagesService.getMessagesByConversationId(1L,5L,conversationId);
+                //此处Message内容为lastMessageId_currentPage
+                String[] messageContent = messages.getMessageContent().split("_");
+                Long lastMessageId = Long.parseLong(messageContent[0]);
+                Long currentPage = Long.parseLong(messageContent[1]);
+
+                IPage<Messages> chatHistory = messagesService.getMessagesByConversationId(lastMessageId,currentPage,5L,conversationId);
                 System.out.println("chatHistory: " + chatHistory);
                 senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.CHATHISTORY, chatHistory)));
             default:

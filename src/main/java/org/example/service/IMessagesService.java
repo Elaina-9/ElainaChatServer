@@ -16,6 +16,6 @@ import java.util.List;
  * @since 2025-02-28
  */
 public interface IMessagesService extends IService<Messages> {
-    IPage<Messages> getMessagesByConversationId(Long current, Long size, String conversationId);
+    IPage<Messages> getMessagesByConversationId(Long lastMessageId,Long current, Long size, String conversationId);
     boolean addMessage(Messages message);
 }

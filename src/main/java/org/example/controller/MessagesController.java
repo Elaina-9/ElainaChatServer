@@ -25,14 +25,14 @@ public class MessagesController {
         return messagesService.list(wrapper);
     }
 
-    @GetMapping("/page/{current}/{size}")
-    @ResponseBody
-    public IPage<Messages> getMessagesByPage(
-            @PathVariable Long current,
-            @PathVariable Long size,
-            @RequestParam String conversationId) {
-        return messagesService.getMessagesByConversationId(current, size, conversationId);
-    }
+//    @GetMapping("/page/{current}/{size}")
+//    @ResponseBody
+//    public IPage<Messages> getMessagesByPage(
+//            @PathVariable Long current,
+//            @PathVariable Long size,
+//            @RequestParam String conversationId) {
+//        return messagesService.getMessagesByConversationId(current, size, conversationId);
+//    }
 
     @GetMapping("/sender/{senderId}")
     @ResponseBody

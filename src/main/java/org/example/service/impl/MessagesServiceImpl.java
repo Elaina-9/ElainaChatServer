@@ -23,18 +23,21 @@ import java.util.List;
 @Service
 public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> implements IMessagesService {
     @Override
-    public IPage<Messages> getMessagesByConversationId(Long current, Long size, String conversationId) {
+    public IPage<Messages> getMessagesByConversationId(Long lastMessageId,Long current, Long size, String conversationId) {
         Page<Messages> page = new Page<>(current, size);
         LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
         //根据ConversationId获得senderId和receiverId
         Long senderId = Long.parseLong(conversationId.split("_")[0]);
         Long receiverId = Long.parseLong(conversationId.split("_")[1]);
-        wrapper.eq(Messages::getSenderId, receiverId)
+        wrapper.nested(w -> w
+                .eq(Messages::getSenderId, receiverId)
                 .eq(Messages::getReceiverId, senderId)
                 .or()
                 .eq(Messages::getSenderId, senderId)
-                .eq(Messages::getReceiverId, receiverId)
-                .orderByAsc(Messages::getCreatedAt);
+                .eq(Messages::getReceiverId, receiverId))
+                .lt(Messages::getId, lastMessageId)
+                .orderByDesc(Messages::getId)
+                .orderByDesc(Messages::getCreatedAt);
         return this.page(page, wrapper);
     }
     @Override

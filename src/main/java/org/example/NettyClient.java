@@ -96,8 +96,9 @@ class Main {
 //        Content content = new Content(ContentType.CONNECT,"ac");
 //        client.sendMessage(content);
 
-//        Content content = new Content(ContentType.CHATHISTORY,new Messages(1L,2L,""));
-//        client.sendMessage(content);
+        String messagecontent = "100" + "_" + "2";
+        Content content = new Content(ContentType.CHATHISTORY,new Messages(1L,2L,messagecontent));
+        client.sendMessage(content);
 
 //        while(true){
 //            //询问用户输入
