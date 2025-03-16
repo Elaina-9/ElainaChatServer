@@ -7,13 +7,11 @@ import com.google.gson.reflect.TypeToken;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.example.entity.Content;
-import org.example.entity.ContentType;
-import org.example.entity.Messages;
-import org.example.entity.Users;
+import org.example.entity.*;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
     private Channel channel;
@@ -51,6 +49,12 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
                     System.out.println(m.getSenderId() + "  send to " + m.getReceiverId() + " : " + m.getMessageContent());
                 }
                 break;
+            case FRIENDQUERY:
+                List<FriendsInfo> friends = gson.fromJson(gson.toJson(content.getData()), new TypeToken<List<FriendsInfo>>(){}.getType());
+                for(FriendsInfo f : friends) {
+                    System.out.println(f.toString());
+                }
+
         }
         //System.out.println("Server response: " + message);
     }

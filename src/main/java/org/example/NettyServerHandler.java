@@ -10,18 +10,19 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import com.google.gson.Gson;
 import org.apache.catalina.User;
-import org.example.entity.Content;
+import org.example.entity.*;
+import org.example.service.IFriendsService;
 import org.example.service.IMessagesService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.example.entity.Messages;
-import org.example.entity.ContentType;
+
 import org.example.entity.Content;
 import org.example.service.IUsersService;
-import org.example.entity.Users;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
     // 用户id和Channel的映射关系
@@ -30,13 +31,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 
     private IMessagesService messagesService;
     private IUsersService usersService;
-    private Gson gson = new Gson();
+    private IFriendsService friendsService;
+    private Gson gson;
 
 
     public NettyServerHandler() {
         // 通过 SpringUtils 获取 Service 实例
         this.messagesService = SpringUtils.getBean(IMessagesService.class);
         this.usersService = SpringUtils.getBean(IUsersService.class);
+        this.friendsService = SpringUtils.getBean(IFriendsService.class);
         // 创建支持 LocalDateTime 的 Gson 实例
         this.gson = CustomGson.getCustomGson();
     }
@@ -113,6 +116,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
                 Long receiverId = message.getReceiverId();
                 //通过channelToUserIdMap获取发送者的id
                 Long senderId = channelToUserIdMap.get(senderChannel);
+                //得到当前连接用户的id，判断发送人是否正确
+                if(channelToUserIdMap.get(senderChannel) != senderId) {
+                    senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.SERVERRESPONSE, "send message failed\n")));
+                    return;
+                }
                 // 设置会话 ID,为senderId和receiverId的组合
                 message.setConversationId(senderId.toString() + "_" + receiverId.toString());
                 boolean isSuccess = messagesService.addMessage(message);
@@ -139,6 +147,67 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
                 IPage<Messages> chatHistory = messagesService.getMessagesByConversationId(lastMessageId,currentPage,5L,conversationId);
                 System.out.println("chatHistory: " + chatHistory);
                 senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.CHATHISTORY, chatHistory)));
+                break;
+            case FRIENDREQUEST:
+                Friends friend = gson.fromJson(gson.toJson(content.getData()), Friends.class);
+                //判断发送者是否为当前连接用户
+//                if(channelToUserIdMap.get(senderChannel) != friend.getUserId()) {
+//                    senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.SERVERRESPONSE, "send friend request failed\n")));
+//                    return;
+//                }
+                friend.setStatus((byte)0);
+                boolean isFriend = friendsService.addFriendRecord(friend);
+                senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.SERVERRESPONSE, isFriend?"send friend request success\n":"send friend request failed\n")));
+                break;
+            case FRIENDRESPONSE:
+                Friends responseFriend = gson.fromJson(gson.toJson(content.getData()), Friends.class);
+                //判断发送者是否为当前连接用户
+//                if(channelToUserIdMap.get(senderChannel) != responseFriend.getUserId()) {
+//                    senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.SERVERRESPONSE, "response friend request failed\n")));
+//                    return;
+//                }
+                boolean isResponse = friendsService.updateFriendRecord(responseFriend);
+                senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.SERVERRESPONSE, isResponse?"response friend request success\n":"response friend request failed\n")));
+               break;
+            case FRIENDQUERY:
+                Friends queryFriend = gson.fromJson(gson.toJson(content.getData()), Friends.class);
+                //判断发送者是否为当前连接用户
+//                if(channelToUserIdMap.get(senderChannel) != queryFriend.getUserId()) {
+//                    senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.SERVERRESPONSE, "query friend failed\n")));
+//                    return;
+//                }
+                List<Friends> resultFriend = friendsService.getFriendsByUserId(queryFriend.getUserId());
+                for(Friends f : resultFriend) {
+                    System.out.println(f);
+                }
+                //根据friend的id返回信息,遍历
+                List<FriendsInfo> friendsInfo = new ArrayList<>();
+                for(Friends f : resultFriend) {
+                    //得到朋友的id
+                    Long friendId;
+                    if(f.getFriendId() == queryFriend.getUserId()) {
+                        friendId = f.getUserId();
+                    } else {
+                        friendId = f.getFriendId();
+                    }
+
+                    Users user1 = usersService.getById(friendId);
+                    System.out.println("user1: " + user1);
+                    FriendsInfo friendInfo = new FriendsInfo();
+                    friendInfo.setUserId(user1.getId());
+                    friendInfo.setUserName(user1.getUsername());
+                    friendInfo.setUserAvatar(user1.getAvatarUrl());
+                    List<Messages> messages1= messagesService.getMessagesByConversationId(100L,1L,5L,user1.getId().toString()+"_"+queryFriend.getUserId().toString()).getRecords();
+                    if(messages1.size() > 0) {
+                        friendInfo.setLastMessage(messages1.get(0).getMessageContent());
+                        friendInfo.setLastMessageTime(messages1.get(0).getCreatedAt());
+                    }
+                    System.out.println("friendInfo: " + friendInfo);
+                    friendsInfo.add(friendInfo);
+                }
+
+                senderChannel.writeAndFlush(gson.toJson(new Content(ContentType.FRIENDQUERY, friendsInfo)));
+                break;
             default:
                 break;
         }

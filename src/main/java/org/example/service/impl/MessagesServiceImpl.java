@@ -35,7 +35,7 @@ public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> i
                 .or()
                 .eq(Messages::getSenderId, senderId)
                 .eq(Messages::getReceiverId, receiverId))
-                .lt(Messages::getId, lastMessageId)
+                .le(Messages::getId, lastMessageId)
                 .orderByDesc(Messages::getId)
                 .orderByDesc(Messages::getCreatedAt);
         return this.page(page, wrapper);

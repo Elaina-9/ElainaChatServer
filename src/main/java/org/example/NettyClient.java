@@ -11,12 +11,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import org.example.entity.Content;
-import org.example.entity.ContentType;
-import org.example.entity.Messages;
-import org.example.entity.Users;
+import io.netty.util.CharsetUtil;
+import org.example.entity.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -37,10 +36,8 @@ public class NettyClient {
         this.port = port;
         this.group = new NioEventLoopGroup();
         //适配LocalDateTime
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .serializeNulls()
-                .create();
+        this.gson = CustomGson.getCustomGson();
+
     }
 
     public void start() throws Exception {
@@ -52,8 +49,10 @@ public class NettyClient {
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new StringDecoder());
-                            pipeline.addLast(new StringEncoder());
+                            pipeline.addLast(new StringDecoder(CharsetUtil.UTF_8));
+                            pipeline.addLast(new StringEncoder(CharsetUtil.UTF_8));
+                            // 添加行解码器
+                            pipeline.addLast(new LineBasedFrameDecoder(8192));
                             pipeline.addLast(new NettyClientHandler(NettyClient.this));
                         }
                     });
@@ -93,12 +92,28 @@ class Main {
 //        Content content = new Content(ContentType.LOGIN, new Users(1L, "123456"));
 //        client.sendMessage(content);
 
-//        Content content = new Content(ContentType.CONNECT,"ac");
+        Content content = new Content(ContentType.CONNECT,"ac");
+        client.sendMessage(content);
+
+        Thread.sleep(1000);
+        Friends friends = new Friends(1L, null);
+        content = new Content(ContentType.FRIENDQUERY, friends);
+        client.sendMessage(content);
+
+
+
+//        Friends friends = new Friends(2L, 1L);
+//        friends.setId(11L);
+//        content = new Content(ContentType.FRIENDREQUEST, friends);
+//        client.sendMessage(content);
+//        Thread.sleep(10000);
+//        friends.setStatus((byte)2);
+//        content = new Content(ContentType.FRIENDRESPONSE, friends);
 //        client.sendMessage(content);
 
-        String messagecontent = "100" + "_" + "2";
-        Content content = new Content(ContentType.CHATHISTORY,new Messages(1L,2L,messagecontent));
-        client.sendMessage(content);
+//        String messagecontent = "100" + "_" + "2";
+//        Content content = new Content(ContentType.CHATHISTORY,new Messages(1L,2L,messagecontent));
+//        client.sendMessage(content);
 
 //        while(true){
 //            //询问用户输入
