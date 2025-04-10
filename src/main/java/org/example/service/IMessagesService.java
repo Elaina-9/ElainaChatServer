@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.entity.Messages;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.example.entity.Messages;
+
+import java.time.LocalDateTime;
 import java.util.List;
 /**
  * <p>
@@ -16,6 +18,7 @@ import java.util.List;
  * @since 2025-02-28
  */
 public interface IMessagesService extends IService<Messages> {
-    IPage<Messages> getMessagesByConversationId(Long lastMessageId,Long current, Long size, String conversationId);
-    boolean addMessage(Messages message);
+    List<Messages> getNewMessagesByConversationId(String ConversationId, Long messageId);
+    IPage<Messages> getOldMessagesByConversationId(String ConversationId, Long messageId);
+    Messages addMessage(Messages message);
 }

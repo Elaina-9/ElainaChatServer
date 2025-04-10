@@ -55,4 +55,9 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     public Long getUserIdByToken(String token) {
         return this.baseMapper.getUserIdByToken(token);
     }
+
+    @Override
+    public Users getUserById(Long userId) {
+        return this.baseMapper.getUserById(userId);
+    }
 }

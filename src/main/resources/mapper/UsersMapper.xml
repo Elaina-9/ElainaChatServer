@@ -31,4 +31,9 @@
         WHERE token = #{token} and status = 1
     </select>
 
+    <select id="getUserById" resultType="org.example.entity.Users">
+        SELECT * FROM users
+        WHERE id = #{id} and status = 1
+    </select>
+
 </mapper>

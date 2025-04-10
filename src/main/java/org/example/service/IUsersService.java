@@ -17,4 +17,5 @@ public interface IUsersService extends IService<Users> {
     boolean updateUser(Users user);
     Users register(Users user);
     Long getUserIdByToken(String token);
+    Users getUserById(Long id);
 }

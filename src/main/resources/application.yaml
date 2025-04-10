@@ -8,7 +8,7 @@ spring:
     sql:
         init:
             mode: always
-            schema-locations: classpath:messages.sql,classpath:user.sql,classpath:friend.sql
+            schema-locations: classpath:conversation.sql,classpath:users.sql,classpath:member.sql,classpath:messages.sql
             encoding: UTF-8
             platform: mysql
 

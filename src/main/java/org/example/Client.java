@@ -20,8 +20,8 @@ public class Client {
             if(messagecontent.equals("exit")){
                 break;
             }
-            content = new Content(ContentType.MESSAGE, new Messages(2L, 1L, messagecontent));
-            client.sendMessage(content);
+//            content = new Content(ContentType.MESSAGE, new Messages(2L, 1L, messagecontent));
+//            client.sendMessage(content);
         }
     }
 }

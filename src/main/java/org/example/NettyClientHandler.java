@@ -2,7 +2,6 @@ package org.example;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,7 +9,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.example.entity.*;
 
 import java.lang.reflect.Type;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
@@ -42,18 +40,28 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
             case SERVERRESPONSE:
                 System.out.println("Server response: " + content.getData().toString());
                 break;
-            case CHATHISTORY:
+            case OLDCHATRECORD:
                 Type pageType = new TypeToken<IPage<Messages>>(){}.getType();
                 IPage<Messages> messages = gson.fromJson(gson.toJson(content.getData()), pageType);
                 for(Messages m : messages.getRecords()) {
                     System.out.println(m.getSenderId() + "  send to " + m.getReceiverId() + " : " + m.getMessageContent());
                 }
                 break;
-            case FRIENDQUERY:
-                List<FriendsInfo> friends = gson.fromJson(gson.toJson(content.getData()), new TypeToken<List<FriendsInfo>>(){}.getType());
-                for(FriendsInfo f : friends) {
-                    System.out.println(f.toString());
+            case NEWCHATRECORD:
+                Type pageType2 = new TypeToken<List<Messages>>(){}.getType();
+                List<Messages> messages2 = gson.fromJson(gson.toJson(content.getData()), pageType2);
+                for(Messages m : messages2) {
+                    System.out.println(m.getSenderId() + "  send to " + m.getReceiverId() + " : " + m.getMessageContent());
                 }
+                break;
+            case INITCONVERSATION:
+                Type pageType3 = new TypeToken<IPage<Messages>>(){}.getType();
+                IPage<Messages> messages3 = gson.fromJson(gson.toJson(content.getData()), pageType3);
+                System.out.println("Init conversation: " + messages3.getTotal());
+                for(Messages m : messages3.getRecords()) {
+                    System.out.println(m.getSenderId() + "  send to " + m.getReceiverId() + " : " + m.getMessageContent());
+                }
+                break;
 
         }
         //System.out.println("Server response: " + message);

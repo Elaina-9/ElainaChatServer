@@ -79,6 +79,10 @@ public class NettyClient {
         }
         group.shutdownGracefully();
     }
+    //返回channel状态
+    public boolean isLogin(){
+        return channel.isActive();
+    }
 }
 
 class Main {
@@ -89,30 +93,49 @@ class Main {
 //        Content content = new Content(ContentType.REGISTER, new Users("Ge", "123456"));
 //        client.sendMessage(content);
 
-//        Content content = new Content(ContentType.LOGIN, new Users(1L, "123456"));
+//        Content content = new Content(ContentType.LOGIN, new Users(1L, "hashed_password1"));
 //        client.sendMessage(content);
+//        //等待返回信息
+//        Thread.sleep(1000);
+//        boolean isLogin = client.isLogin();
+//        System.out.println(isLogin);
 
-        Content content = new Content(ContentType.CONNECT,"ac");
-        client.sendMessage(content);
-
+//        Content content = new Content(ContentType.CONNECT,"ac");
+//        client.sendMessage(content);
+//
         Thread.sleep(1000);
-        Friends friends = new Friends(1L, null);
-        content = new Content(ContentType.FRIENDQUERY, friends);
+//        Friends friends = new Friends(1L, null);
+//        content = new Content(ContentType.FRIENDQUERY, friends);
+//        client.sendMessage(content);
+
+//        Messages messages = new Messages(1L, 2L, "conv_private_1", "hello");
+//        messages.setId(30L);
+//
+//        Content content = new Content(ContentType.OLDCHATRECORD,messages);
+//        client.sendMessage(content);
+
+//        Content content = new Content(ContentType.NEWCHATRECORD, messages);
+//        client.sendMessage(content);
+
+//        Member member = new Member();
+//        member.setUserId(2L);
+//        Content content = new Content(ContentType.CONVERSATIONINFO, member);
+//        client.sendMessage(content);
+
+//        content = new Content(ContentType.CREATEPRIVATECONVERSATION, "3");
+//        client.sendMessage(content);
+//
+//        Thread.sleep(1000);
+
+        Conversation conversation = new Conversation();
+        conversation.setConversationId("conv_private_1");
+        Content content = new Content(ContentType.INITCONVERSATION, conversation);
         client.sendMessage(content);
 
-
-
-//        Friends friends = new Friends(2L, 1L);
-//        friends.setId(11L);
-//        content = new Content(ContentType.FRIENDREQUEST, friends);
-//        client.sendMessage(content);
-//        Thread.sleep(10000);
-//        friends.setStatus((byte)2);
-//        content = new Content(ContentType.FRIENDRESPONSE, friends);
-//        client.sendMessage(content);
-
-//        String messagecontent = "100" + "_" + "2";
-//        Content content = new Content(ContentType.CHATHISTORY,new Messages(1L,2L,messagecontent));
+//        Conversation conversation = new Conversation();
+//        conversation.setConversationId("5f714aee-6ad5-4a65-8490-c5be035c72d8");
+//        conversation.setStatus(((byte) 1));
+//        content = new Content(ContentType.PRIVATECONVERSATIONRESPONSE,conversation);
 //        client.sendMessage(content);
 
 //        while(true){
@@ -122,7 +145,7 @@ class Main {
 //            if(messagecontent.equals("exit")){
 //                break;
 //            }
-//            content = new Content(ContentType.MESSAGE, new Messages(1L, 2L, messagecontent));
+//            Content content = new Content(ContentType.MESSAGE, new Messages(1L, 2L, "conv_private_1",messagecontent));
 //            client.sendMessage(content);
 //        }
     }

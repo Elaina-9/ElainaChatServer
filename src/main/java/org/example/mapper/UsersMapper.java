@@ -19,5 +19,6 @@ public interface UsersMapper extends BaseMapper<Users> {
     Users login(@Param("id") long id, @Param("password") String password);
     int updateUser(Users user);
     Long getUserIdByToken(String token);
+    Users getUserById(Long userId);
 }
 

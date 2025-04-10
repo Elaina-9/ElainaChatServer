@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,28 +23,28 @@ import java.util.List;
  */
 @Service
 public class MessagesServiceImpl extends ServiceImpl<MessagesMapper, Messages> implements IMessagesService {
+
     @Override
-    public IPage<Messages> getMessagesByConversationId(Long lastMessageId,Long current, Long size, String conversationId) {
-        Page<Messages> page = new Page<>(current, size);
+    public List<Messages> getNewMessagesByConversationId(String conversationId, Long messageId) {
+            LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Messages::getConversationId, conversationId)
+                    .gt(Messages::getId, messageId)
+                    .orderByAsc(Messages::getId);
+            return this.list(wrapper);
+    }
+    @Override
+    public IPage<Messages> getOldMessagesByConversationId(String conversationId, Long messageId) {
         LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
-        //根据ConversationId获得senderId和receiverId
-        Long senderId = Long.parseLong(conversationId.split("_")[0]);
-        Long receiverId = Long.parseLong(conversationId.split("_")[1]);
-        wrapper.nested(w -> w
-                .eq(Messages::getSenderId, receiverId)
-                .eq(Messages::getReceiverId, senderId)
-                .or()
-                .eq(Messages::getSenderId, senderId)
-                .eq(Messages::getReceiverId, receiverId))
-                .le(Messages::getId, lastMessageId)
-                .orderByDesc(Messages::getId)
-                .orderByDesc(Messages::getCreatedAt);
-        return this.page(page, wrapper);
+        wrapper.eq(Messages::getConversationId, conversationId)
+                .lt(Messages::getId, messageId)
+                .orderByDesc(Messages::getId);
+        return this.page(new Page<>(1, 5), wrapper);
     }
     @Override
     @Transactional
-    public boolean addMessage(Messages message) {
-        return this.save(message);
+    public Messages addMessage(Messages message) {
+        this.save(message);
+        return message;
     }
 
 }

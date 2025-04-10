@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,9 +38,10 @@ public class Messages implements Serializable {
     private String messageContent;
 
     private LocalDateTime createdAt;
-    public Messages(Long senderId,Long receiverId,String messageContent){
+    public Messages(Long senderId,Long receiverId,String conversationId,String messageContent){
         this.senderId = senderId;
         this.receiverId = receiverId;
+        this.conversationId = conversationId;
         this.messageContent = messageContent;
         this.createdAt = LocalDateTime.now();
     }
